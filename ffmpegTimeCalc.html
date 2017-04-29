@@ -1,0 +1,127 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+</head>
+
+<body>
+
+    <div>Input filename: <input type="text" id="inputFilename"></div>
+    <div>Output filename: <input type="text" id="outputFilename"></div>
+    <div>Slice start time: <input type="text" id="startTime"></div>
+    <div>Slice end time: <input type="text" id="endTime"></div>
+    <input type="checkbox" id="720p"> 720p resolution ?
+    <div>Test command:<br><textarea name="cmdTest" id="cmdTest" cols="100" rows="5"></textarea></div>
+    <div>Command:<br><textarea name="cmd" id="cmd" cols="100" rows="5"></textarea></div>
+    <div><button id="count" onclick="run()">Generate command</button></div>
+
+    <script>
+
+        var cmd = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {duration} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilename}';
+        var cmdTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t 00:00:10 -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilename}';
+
+        function run() {
+            timeCounter(cmd, 'cmd');
+            timeCounter(cmdTest, 'cmdTest');
+        }
+
+        function timeCounter(command, field) {
+
+            var startOffset = '';
+            var specificOffset = '';
+            var duration = '';
+            var inputFilename = '';
+            var outputFilename = '';
+            var timeOffset = 10; // how many seconds test recording should have
+            var cmd720p = '-vf scale="1280:-1"';
+
+            function replace(tag, value) {
+                command = command.replace('{' + tag + '}', value);
+            }
+
+            function parseTime(time) {
+                var t = time.split(':');
+                var seconds = parseFloat(t[0] * 3600) + parseFloat(t[1] * 60) + parseFloat(t[2]);
+
+                return seconds;
+            }
+
+            function sec2tab(t) {
+                ans = new Array();
+                z = '';
+
+                if (t < 0) {
+                    z = "-";
+                }
+
+                t = Math.abs(t);
+
+                ans[0] = Math.floor(t / 3600);
+                ans[1] = Math.floor((t - ans[0] * 3600) / 60);
+                s = Math.floor(t - ans[0] * 3600 - ans[1] * 60);
+                ans[0] = z + ans[0];
+                ms = new String(t);
+                ix = ms.indexOf(".");
+                if (ix > -1) {
+                    s += ms.substr(ix);
+                }
+                ans[2] = s;
+
+                return ans;
+            }
+
+            function formatTime(seconds) {
+
+                function pad(number, chars) {
+                    return ('0000' + number).slice(-chars);
+                }
+
+                function padTime(n) {
+                    return pad(n, 2);
+                }
+
+                var paddedTime = seconds.map(padTime);
+
+                return paddedTime.join(':');
+            }
+
+            function calculateDuration() {
+
+                var start = document.getElementById('startTime').value;
+                var end = document.getElementById('endTime').value;
+
+                var startSec = parseTime(start);
+                var endSec = parseTime(end);
+                var seconds = sec2tab(endSec - startSec);
+
+                return formatTime(seconds);
+            }
+
+            function calculateStartOffset() {
+                var start = document.getElementById('startTime').value;
+
+                var startSec = parseTime(start);
+                var seconds = sec2tab(startSec - timeOffset);
+
+                return formatTime(seconds);
+            }
+
+            function calculateSpecificOffset() {
+                var seconds = sec2tab(timeOffset);
+                return formatTime(seconds);
+            }
+
+            replace('720p', document.getElementById('720p').checked ? cmd720p : '');
+            replace('inputFilename', document.getElementById('inputFilename').value);
+            replace('outputFilename', document.getElementById('outputFilename').value);
+            replace('startOffset', calculateStartOffset());
+            replace('specificOffset', calculateSpecificOffset());
+            replace('duration', calculateDuration());
+
+            document.getElementById(field).value = command;
+        }
+    </script>
+
+</body>
+
+</html>
