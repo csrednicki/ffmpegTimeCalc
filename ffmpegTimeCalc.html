@@ -10,19 +10,23 @@
     <div>Output filename: <input type="text" id="outputFilename"></div>
     <div>Slice start time: <input type="text" id="startTime"></div>
     <div>Slice end time: <input type="text" id="endTime"></div>
+    <div>Test duration (in seconds): <input type="text" id="durationTest" value="10"></div>
     <input type="checkbox" id="720p"> 720p resolution ?
-    <div>Test command:<br><textarea name="cmdTest" id="cmdTest" cols="100" rows="5"></textarea></div>
-    <div>Command:<br><textarea name="cmd" id="cmd" cols="100" rows="5"></textarea></div>
+    <div>Test encoding start point:<br><textarea id="cmdStartTest" cols="100" rows="5"></textarea></div>
+    <div>Test encoding end point:<br><textarea id="cmdEndTest" cols="100" rows="5"></textarea></div>
+    <div>Final encode command:<br><textarea name="cmd" id="cmd" cols="100" rows="5"></textarea></div>
     <div><button id="count" onclick="run()">Generate command</button></div>
 
     <script>
 
         var cmd = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {duration} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilename}';
-        var cmdTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t 00:00:10 -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilename}';
+        var cmdStartTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {durationTest} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilenameStartTest}';
+        var cmdEndTest = 'ffmpeg -ss {endOffset} -i {inputFilename} -t {durationTest} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilenameEndTest}';
 
         function run() {
             timeCounter(cmd, 'cmd');
-            timeCounter(cmdTest, 'cmdTest');
+            timeCounter(cmdStartTest, 'cmdStartTest');
+            timeCounter(cmdEndTest, 'cmdEndTest');
         }
 
         function timeCounter(command, field) {
@@ -32,7 +36,8 @@
             var duration = '';
             var inputFilename = '';
             var outputFilename = '';
-            var timeOffset = 10; // how many seconds test recording should have
+            var durationTest = parseFloat(document.getElementById('durationTest').value) || 30; // seeking precise timing
+            var timeOffset = 10; // seeking precise timing
             var cmd720p = '-vf scale="1280:-1"';
 
             function replace(tag, value) {
@@ -106,17 +111,50 @@
                 return formatTime(seconds);
             }
 
+            function calculateEndOffset() {
+                var end = document.getElementById('endTime').value;
+
+                var endSec = parseTime(end);
+                var seconds = sec2tab(endSec - durationTest);
+
+                return formatTime(seconds);
+            }
+
             function calculateSpecificOffset() {
                 var seconds = sec2tab(timeOffset);
                 return formatTime(seconds);
             }
 
+            function calculateDurationTest() {
+                var seconds = sec2tab(durationTest);
+                return formatTime(seconds);
+            }
+
+            function formatOutputFilename(suffix) {
+                var filename = document.getElementById('outputFilename').value;
+                var filenameParts = filename.split('.');
+
+                if(suffix) {
+                    var filename = filenameParts[0] + '_' + suffix + '.' + filenameParts[1];
+                }
+
+                return filename;
+            }
+
             replace('720p', document.getElementById('720p').checked ? cmd720p : '');
             replace('inputFilename', document.getElementById('inputFilename').value);
-            replace('outputFilename', document.getElementById('outputFilename').value);
             replace('startOffset', calculateStartOffset());
+            replace('endOffset', calculateEndOffset());
             replace('specificOffset', calculateSpecificOffset());
             replace('duration', calculateDuration());
+            replace('durationTest', calculateDurationTest());
+
+            replace('outputFilename', formatOutputFilename() );
+            replace('outputFilenameStartTest', formatOutputFilename('start') );
+            replace('outputFilenameEndTest', formatOutputFilename('end') );
+
+            
+
 
             document.getElementById(field).value = command;
         }
