@@ -30,20 +30,20 @@
                         <div class="form-group">
                             <label class="col-lg-3 control-label" for="startTime">Slice start time</label>
                             <div class="col-lg-9">
-                                <input type="text" class="form-control" id="startTime" placeholder="00:00:00">
+                                <input type="text" class="form-control" id="startTime" placeholder="00:00:00" value="00:00:00">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-lg-3 control-label" for="endTime">Slice end time</label>
                             <div class="col-lg-9">
-                                <input type="text" class="form-control" id="endTime" placeholder="00:00:00">
+                                <input type="text" class="form-control" id="endTime" placeholder="00:00:00" value="00:00:00">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label class="col-lg-3 control-label" for="durationTest">Test duration (in seconds)</label>
                             <div class="col-lg-9">
-                                <input type="text" class="form-control" id="durationTest" placeholder="10" value="10">
+                                <input type="text" class="form-control" id="durationTest" placeholder="5" value="5">
                             </div>
                         </div>
 
@@ -51,6 +51,13 @@
                             <label class="col-lg-3 control-label" for="720p">720p resolution ?</label>
                             <div class="col-lg-9">
                                 <input type="checkbox" id="720p">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-lg-3 control-label" for="crop">Crop ?</label>
+                            <div class="col-lg-9">
+                                <input type="checkbox" id="crop">
                             </div>
                         </div>
 
@@ -92,9 +99,9 @@
 
 
     <script>
-        var cmd = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {duration} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilename}';
-        var cmdStartTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {durationTest} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilenameStartTest}';
-        var cmdEndTest = 'ffmpeg -ss {endOffset} -i {inputFilename} -t {durationTest} -c:a copy -c:v libx264 {720p} -preset slow -crf 25 {outputFilenameEndTest}';
+        var cmd = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {duration} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 {outputFilename}';
+        var cmdStartTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 -y {outputFilenameStartTest}';
+        var cmdEndTest = 'ffmpeg -ss {endOffset} -i {inputFilename} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 -y {outputFilenameEndTest}';
 
         function run(event) {
             timeCounter(cmd, 'cmd');
@@ -110,9 +117,19 @@
             var duration = '';
             var inputFilename = '';
             var outputFilename = '';
+            var filters = [];
             var durationTest = parseFloat(document.getElementById('durationTest').value) || 30; // seeking precise timing
             var timeOffset = 10; // seeking precise timing
-            var cmd720p = '-vf scale="1280:-1"';
+            var vf_scale = 'scale=1280:-1';
+            var vf_crop = 'crop=in_w-8:in_h-8'
+            var cmd_filters = '';
+
+            if( document.getElementById('crop').checked ) { filters.push(vf_crop); }
+            if( document.getElementById('720p').checked ) { filters.push(vf_scale); }
+
+            if(filters.length > 0) {
+                cmd_filters = '-filter:v "' + filters.join(',') + '"';
+            }
 
             function replace(tag, value) {
                 command = command.replace('{' + tag + '}', value);
@@ -215,7 +232,7 @@
                 return filename;
             }
 
-            replace('720p', document.getElementById('720p').checked ? cmd720p : '');
+            replace('filters', cmd_filters);
             replace('inputFilename', document.getElementById('inputFilename').value);
             replace('startOffset', calculateStartOffset());
             replace('endOffset', calculateEndOffset());
