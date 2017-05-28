@@ -107,8 +107,8 @@
 
     <script>
         var cmd = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {duration} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 {outputFilename}';
-        var cmdStartTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 -y {outputFilenameStartTest}';
-        var cmdEndTest = 'ffmpeg -ss {endOffset} -i {inputFilename} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 -y {outputFilenameEndTest}';
+        var cmdStartTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset fast -crf 25 -y {outputFilenameStartTest}';
+        var cmdEndTest = 'ffmpeg -ss {endOffset} -i {inputFilename} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset fast -crf 25 -y {outputFilenameEndTest}';
 
         function run(event) {
             timeCounter(cmd, 'cmd');
