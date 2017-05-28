@@ -62,6 +62,13 @@
                         </div>
 
                         <div class="form-group">
+                            <label class="col-lg-3 control-label" for="crop">Unsharp ?</label>
+                            <div class="col-lg-9">
+                                <input type="checkbox" id="unsharp">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
                             <div class="col-lg-3">
                                 Test encoding start point:
                             </div>
@@ -121,13 +128,15 @@
             var durationTest = parseFloat(document.getElementById('durationTest').value) || 30; // seeking precise timing
             var timeOffset = 10; // seeking precise timing
             var vf_scale = 'scale=1280:-1';
-            var vf_crop = 'crop=in_w-8:in_h-8'
+            var vf_crop = 'crop=in_w-8:in_h-8';
+            var vf_unsharp = 'unsharp=5:5:2';
             var cmd_filters = '';
 
-            if( document.getElementById('crop').checked ) { filters.push(vf_crop); }
-            if( document.getElementById('720p').checked ) { filters.push(vf_scale); }
+            if (document.getElementById('crop').checked) { filters.push(vf_crop); }
+            if (document.getElementById('720p').checked) { filters.push(vf_scale); }
+            if (document.getElementById('unsharp').checked) { filters.push(vf_unsharp); }
 
-            if(filters.length > 0) {
+            if (filters.length > 0) {
                 cmd_filters = '-filter:v "' + filters.join(',') + '"';
             }
 
