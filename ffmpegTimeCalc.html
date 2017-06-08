@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="./css/bootstrap.min.css" media="screen">
+    <script src="js/moment-with-locales.min.js"></script>
 </head>
 
 <body>
@@ -30,13 +31,13 @@
                         <div class="form-group">
                             <label class="col-lg-3 control-label" for="startTime">Slice start time</label>
                             <div class="col-lg-9">
-                                <input type="text" class="form-control" id="startTime" placeholder="00:00:00" value="00:00:00">
+                                <input type="text" class="form-control" id="startTime" placeholder="00:00:00" value="00:02:14.2">
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="col-lg-3 control-label" for="endTime">Slice end time</label>
                             <div class="col-lg-9">
-                                <input type="text" class="form-control" id="endTime" placeholder="00:00:00" value="00:00:00">
+                                <input type="text" class="form-control" id="endTime" placeholder="00:00:00" value="00:05:30.1">
                             </div>
                         </div>
 
@@ -95,7 +96,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-default" id="count" onclick="return run()">Generate command</button>
+                        <button type="submit" class="btn btn-default" id="generate">Generate command</button>
 
                     </form>
                 </div>
@@ -103,159 +104,7 @@
         </div>
     </div>
 
-
-
-    <script>
-        var cmd = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {duration} -c:a copy -c:v libx264 {filters} -preset slow -crf 25 {outputFilename}';
-        var cmdStartTest = 'ffmpeg -ss {startOffset} -i {inputFilename} -ss {specificOffset} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset fast -crf 25 -y {outputFilenameStartTest}';
-        var cmdEndTest = 'ffmpeg -ss {endOffset} -i {inputFilename} -t {durationTest} -c:a copy -c:v libx264 {filters} -preset fast -crf 25 -y {outputFilenameEndTest}';
-
-        function run(event) {
-            timeCounter(cmd, 'cmd');
-            timeCounter(cmdStartTest, 'cmdStartTest');
-            timeCounter(cmdEndTest, 'cmdEndTest');
-            return false;
-        }
-
-        function timeCounter(command, field) {
-
-            var startOffset = '';
-            var specificOffset = '';
-            var duration = '';
-            var inputFilename = '';
-            var outputFilename = '';
-            var filters = [];
-            var durationTest = parseFloat(document.getElementById('durationTest').value) || 30; // seeking precise timing
-            var timeOffset = 10; // seeking precise timing
-            var vf_scale = 'scale=1280:-1';
-            var vf_crop = 'crop=in_w-8:in_h-8';
-            var vf_unsharp = 'unsharp=5:5:2';
-            var cmd_filters = '';
-
-            if (document.getElementById('crop').checked) { filters.push(vf_crop); }
-            if (document.getElementById('720p').checked) { filters.push(vf_scale); }
-            if (document.getElementById('unsharp').checked) { filters.push(vf_unsharp); }
-
-            if (filters.length > 0) {
-                cmd_filters = '-filter:v "' + filters.join(',') + '"';
-            }
-
-            function replace(tag, value) {
-                command = command.replace('{' + tag + '}', value);
-            }
-
-            function parseTime(time) {
-                var t = time.split(':');
-                var seconds = parseFloat(t[0] * 3600) + parseFloat(t[1] * 60) + parseFloat(t[2]);
-
-                return seconds;
-            }
-
-            function sec2tab(t) {
-                ans = new Array();
-                z = '';
-
-                if (t < 0) {
-                    z = "-";
-                }
-
-                t = Math.abs(t);
-
-                ans[0] = Math.floor(t / 3600);
-                ans[1] = Math.floor((t - ans[0] * 3600) / 60);
-                s = Math.floor(t - ans[0] * 3600 - ans[1] * 60);
-                ans[0] = z + ans[0];
-                ms = new String(t);
-                ix = ms.indexOf(".");
-                if (ix > -1) {
-                    s += ms.substr(ix);
-                }
-                ans[2] = s;
-
-                return ans;
-            }
-
-            function formatTime(seconds) {
-
-                function pad(number, chars) {
-                    return ('0000' + number).slice(-chars);
-                }
-
-                function padTime(n) {
-                    return pad(n, 2);
-                }
-
-                var paddedTime = seconds.map(padTime);
-
-                return paddedTime.join(':');
-            }
-
-            function calculateDuration() {
-
-                var start = document.getElementById('startTime').value;
-                var end = document.getElementById('endTime').value;
-
-                var startSec = parseTime(start);
-                var endSec = parseTime(end);
-                var seconds = sec2tab(endSec - startSec);
-
-                return formatTime(seconds);
-            }
-
-            function calculateStartOffset() {
-                var start = document.getElementById('startTime').value;
-
-                var startSec = parseTime(start);
-                var seconds = sec2tab(startSec - timeOffset);
-
-                return formatTime(seconds);
-            }
-
-            function calculateEndOffset() {
-                var end = document.getElementById('endTime').value;
-
-                var endSec = parseTime(end);
-                var seconds = sec2tab(endSec - durationTest);
-
-                return formatTime(seconds);
-            }
-
-            function calculateSpecificOffset() {
-                var seconds = sec2tab(timeOffset);
-                return formatTime(seconds);
-            }
-
-            function calculateDurationTest() {
-                var seconds = sec2tab(durationTest);
-                return formatTime(seconds);
-            }
-
-            function formatOutputFilename(suffix) {
-                var filename = document.getElementById('outputFilename').value;
-                var filenameParts = filename.split('.');
-
-                if (suffix) {
-                    var filename = filenameParts[0] + '_' + suffix + '.' + filenameParts[1];
-                }
-
-                return filename;
-            }
-
-            replace('filters', cmd_filters);
-            replace('inputFilename', document.getElementById('inputFilename').value);
-            replace('startOffset', calculateStartOffset());
-            replace('endOffset', calculateEndOffset());
-            replace('specificOffset', calculateSpecificOffset());
-            replace('duration', calculateDuration());
-            replace('durationTest', calculateDurationTest());
-
-            replace('outputFilename', formatOutputFilename());
-            replace('outputFilenameStartTest', formatOutputFilename('start'));
-            replace('outputFilenameEndTest', formatOutputFilename('end'));
-
-            document.getElementById(field).value = command;
-        }
-    </script>
+    <script src="js/main.js"></script>
 
 </body>
 
