@@ -32,7 +32,7 @@
 
     function formatMomentTime(duration) {
         let d = moment.duration(duration);
-        let formatted = moment.utc(d.as('milliseconds')).format('HH:mm:ss.S');
+        let formatted = moment.utc(d.as('milliseconds')).format('HH:mm:ss.SSS');
 
         return formatted;
     }
@@ -81,7 +81,7 @@
         let filenameParts = filename.split('.');
 
         if (suffix) {
-            let filename = filenameParts[0] + '_' + suffix + '.' + filenameParts[1];
+            filename = `${filenameParts[0]}_${suffix}.${filenameParts[1]}`;
         }
 
         return filename;
@@ -89,14 +89,16 @@
 
     function renderCommands() {
         let startOffset = calculateStartOffset();
-        let inputFilename = document.getElementById('inputFilename').value;
         let specificOffset = calculateSpecificOffset();
         let durationTest = calculateDurationTest();
         let filters = getFilters();
-        let outputFilenameStartTest = formatOutputFilename('start');
         let endOffset = calculateEndOffset();
         let duration = calculateDuration();
+
+        // filenames
+        let inputFilename = document.getElementById('inputFilename').value;
         let outputFilename = formatOutputFilename();
+        let outputFilenameStartTest = formatOutputFilename('start');
         let outputFilenameEndTest = formatOutputFilename('end');
 
         let cmdStartTest = `ffmpeg -ss ${startOffset} -i ${inputFilename} -ss ${specificOffset} -t ${durationTest} -c:a copy -c:v libx264 ${filters} -preset fast -crf 25 -y ${outputFilenameStartTest}`;
