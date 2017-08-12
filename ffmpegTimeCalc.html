@@ -4,6 +4,7 @@
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="./css/bootstrap.min.css" media="screen">
+    <link rel="stylesheet" href="./css/styles.css" media="screen">
     <script src="js/moment-with-locales.min.js"></script>
 </head>
 
@@ -11,65 +12,87 @@
 
     <div class="container">
         <div class="row">
+
             <div class="col-lg-6">
+
                 <div class="well bs-component">
-                    <form class="form-horizontal">
-                        <div class="form-group">
+
+                    <ul class="nav nav-tabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="navSingle" href="#">Single</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="navMulti" href="#">Multi</a>
+                        </li>
+                    </ul>
+
+                    <form id="mainForm" class="form-horizontal">
+
+                        <div class="form-group single multi">
                             <label class="col-lg-3 control-label" for="inputFilename">Input filename</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" id="inputFilename" placeholder="input.mp4">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group multi">
+                            <div class="col-lg-3">
+                                Import times
+                            </div>
+                            <div class="col-lg-9">
+                                <textarea class="form-control" rows="5" id="times"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group single">
                             <label class="col-lg-3 control-label" for="outputFilename">Output filename</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" id="outputFilename" placeholder="output.mp4">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single">
                             <label class="col-lg-3 control-label" for="startTime">Slice start time</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" id="startTime" placeholder="00:00:00" value="00:00:00">
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="form-group single">
                             <label class="col-lg-3 control-label" for="endTime">Slice end time</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" id="endTime" placeholder="00:00:00" value="00:00:00">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single">
                             <label class="col-lg-3 control-label" for="durationTest">Test duration (in seconds)</label>
                             <div class="col-lg-9">
                                 <input type="text" class="form-control" id="durationTest" placeholder="5" value="5">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single multi">
                             <label class="col-lg-3 control-label" for="720p">720p resolution ?</label>
                             <div class="col-lg-9">
                                 <input type="checkbox" id="720p">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single multi">
                             <label class="col-lg-3 control-label" for="crop">Crop ?</label>
                             <div class="col-lg-9">
                                 <input type="checkbox" id="crop">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single multi">
                             <label class="col-lg-3 control-label" for="crop">Unsharp ?</label>
                             <div class="col-lg-9">
                                 <input type="checkbox" id="unsharp">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single">
                             <div class="col-lg-3">
                                 Test encoding start point:
                             </div>
@@ -78,7 +101,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single">
                             <div class="col-lg-3">
                                 Test encoding end point:
                             </div>
@@ -87,7 +110,7 @@
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="form-group single multi">
                             <div class="col-lg-3">
                                 Final encode command:
                             </div>
@@ -99,6 +122,7 @@
                         <button type="submit" class="btn btn-default" id="generate">Generate command</button>
 
                     </form>
+
                 </div>
             </div>
         </div>

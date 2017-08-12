@@ -1,0 +1,19 @@
+#mainForm {
+    margin-top: 20px;
+}
+
+form .multi {
+    display: none;
+}
+form .single.multi {
+    display: block;
+}
+form.multiline .multi {
+    display: block;
+}
+form.multiline .single {
+    display: none;
+}
+form.multiline .single.multi {
+    display: block;
+}
